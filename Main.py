@@ -1,5 +1,5 @@
 from gurobipy import * #se importa todo de la biblioteca
-from gurobipy import GRB
+from gurobipy import Model, GRB, quicksum # se agrega Model, quicksum
 #m.write("riego en predios agricolas.lp")
 
 m = Model('riego en predios agricolas') #creacion del modelo con un nombre y "m" es el objeto de la clase modelo
@@ -48,17 +48,21 @@ Zr =m.addVars(h_,t_,d_)
 W = m.addVars(h_,j_,i_, vtype= GRB.BINARY)
 II =m.addVars(t_,d_) #Este es I pero ya existe un valor I para los rangos
 
+
 #Restriccion i) 
 ## Como agregas una igualdad de valores para un punto del conjunto especifico??
 ###dice como comentario que sobra X, habria que eliminar la suma de Xhtd y listo considerando que se soluciona "##"
-m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
+#m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
 
 #Restriccion ii)
 #m.addConstrs(quicksum(Z[h,t,d,j]*E[j,t] for t in t_ for j in j_) + Pp[d] * A[h] >= sum(Zr[h,t,d]) for h in h_ for d in d_)
 #la naturaleza de algun valor esta definido como tuplas (puntos) y no como valores por lo que no genera una restriccion valida
 
 #Restriccion iii)
-# :O
+#m.addConstrs(quicksum(Zr[h,t,d] for d in range(q + 1,q+T1[i]+1) for t in t_) >= quicksum(Kc1[i]*ETo[q]) - 10000*(1-Ne[i,h,q] for d in range(q+1,q+T1[i]+1) ) for j in j_ for h in h_ for i in i_ for q in range(1,D-Tt[i]+1) )
+#m.addConstrs(quicksum(Zr[h,t,d] for d in range(q + T1[i]+1,q+T1[i]+T2[i]+1) for t in t_) >= quicksum(0.5*(Kc1[i]+Kc2[i])*ETo[q]) - 10000*(1-Ne[i,h,q] for d in range(q+1,q+T1[i]+1) ) for j in j_ for h in h_ for i in i_ for q in range(1,D-Tt[i]+1) )
+#m.addConstrs(quicksum(Zr[h,t,d] for d in range(q + T1[i]+T2[i]+1,q+T1[i]+T2[i]+T3[i]+1) for t in t_) >= quicksum(Kc2[i]*ETo[q]) - 10000*(1-Ne[i,h,q] for d in range(q+1,q+T1[i]+1) ) for j in j_ for h in h_ for i in i_ for q in range(1,D-Tt[i]+1) )
+#m.addConstrs(quicksum(Zr[h,t,d] for d in range(q + T1[i]+T2[i]+T3[i]+1,q+Tt[i]+1) for t in t_) >= quicksum(0.5*(Kc2[i]+Kc3)*ETo[q]) - 10000*(1-Ne[i,h,q] for d in range(q+1,q+T1[i]+1) ) for j in j_ for h in h_ for i in i_ for q in range(1,D-Tt[i]+1) )
 
 #Restriccion iv)
 # m.addConstrs(P >= quicksum(C[h,t] for j in j_ for d in d_ for t in t_ for h in h_) + quicksum(W[h,j] * M[h,j] for j in j_ for h in h_))
@@ -86,4 +90,3 @@ m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t
 
 funcion_objetivo = quicksum(Z[h,t,d,j] for d in d_ for t in t_ for h in h_ for j in j_)
 m.setObjetive(funcion_objetivo, GRB.MINIMIZE)
-
