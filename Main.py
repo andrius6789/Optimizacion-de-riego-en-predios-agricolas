@@ -60,7 +60,7 @@ II =m.addVars(t_,d_) #Este es I pero ya existe un valor I para los rangos
 #Restriccion i) 
 ## Como agregas una igualdad de valores para un punto del conjunto especifico??
 ###dice como comentario que sobra X, habria que eliminar la suma de Xhtd y listo considerando que se soluciona "##"
-#m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
+# m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
 
 #Restriccion ii)
 #m.addConstrs(quicksum(Z[h,t,d,j]*E[j,t] for t in t_ for j in j_) + Pp[d] * A[h] >= sum(Zr[h,t,d]) for h in h_ for d in d_)
