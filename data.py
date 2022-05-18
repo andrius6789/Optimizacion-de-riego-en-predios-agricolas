@@ -76,14 +76,70 @@ X = model.addVars(h_, t_, d_, vtype = GRB.CONTINUOUS, name='X_htd')
 
 Y = model.addVars(t_, d_, vtype = GRB.CONTINUOUS, name='Y_td')
 
-Zr = model.addVars(h_, t_, d_, vtype = GRB.CONTINUOUS, name='Zr_htd')
+Zr = model.addVars(h_, t_, d_, j_, vtype = GRB.CONTINUOUS, name='Zr_htdj')
 
 W = model.addVars(h_, j_, i_, vtype = GRB.BINARY, name='W_hji')
 
 I = model.addVars(t_, d_, vtype = GRB.CONTINUOUS, name='I_td')
 
+model.update()
+
 # restricciones
 
-model.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
-# REVISAR QUE ESTE BIEN
+# i
+model.addConstrs(((I[t - 1, d]) + Y[t, d] == quicksum(Z[h, t, d, j] + I[t, d] for j in j_ for h in h_) for t in range(2, T + 1) for d in d_), name='R1')
+
+model.addConstrs((I[1, d] == I[24, d - 1] for d in range(2, D + 1)), name='R2')
+
+model.addConstr((I[1, 1] == alpha), name='R3')
+
+# ii
+
+model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d] * A[h] >= quicksum(Zr[h, t, d]) for h in h_ for d in d_), name='R4')
+#########
+
+# iii
+######### les agregue , j a los Zr
+########## faltan los indices de M
+model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * Eto[q] - M * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R5')
+
+model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R6')
+
+model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R7')
+
+model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R8')
+
+# iv
+
+model.addConstr((P >= quicksum(Z[h, t, d, j] * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_) + quicksum(W[h, j] * A[h] * M[h, j] for j in j_ for h in h_)), name='R9')
+# *************************
+# v
+
+model.addConstrs((quicksum(W[h, j, i] for j in j_) == 1 for  h in h_), name='R10')
+# ***************
+model.addConstrs((M * W[h, j, i] >= quicksum(Z[h, t, d, j] for d in d_ for t in t_) for h in h_ for j in j_), name='R11')
+################## falta definir i
+
+model.addConstrs((V[i, j] >= W[h, j, i] for h in h_ for j in j_ for i in i_), name='R12')
+
+# vi
+
+model.addConstrs((quicksum(X[h, t, d] + Y[t, d] for t in t_ for h in h_) <= DA[d] for d in d_), name='R13')
+
+# vii
+
+model.addConstrs((I[t, d] <= Ce for d in d_ for t in t_), name='R14')
+
+# Naturaleza de las variables: se hace sola al instanciar las variables
+
+# funcion objetivo
+
+model.setObjective(quicksum(Z[h, t, d, j] for d in d_ for t in t_ for h in h_ for j in j_), GRB.MINIMIZE)
+
+# Optimiza tu problema
+
+model.optimize()
+
+vo = model.ObjVal
+
 
