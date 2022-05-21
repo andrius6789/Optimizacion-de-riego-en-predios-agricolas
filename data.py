@@ -95,30 +95,28 @@ model.addConstr((I[1, 1] == alpha), name='R3')
 
 # ii
 
-model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d] * A[h] >= quicksum(Zr[h, t, d]) for h in h_ for d in d_), name='R4')
-#########
+model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d] * A[h] >= quicksum(Zr[h, t, d] for t in t_) for h in h_ for d in d_), name='R4')
 
 # iii
-######### les agregue , j a los Zr
 ########## faltan los indices de M
-model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * Eto[q] - M * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R5')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * Eto[q] - M * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R5')
 
-model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R6')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R6')
 
-model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R7')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R7')
 
-model.addConstrs((quicksum(Zr[h, t, d, j] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R8')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R8')
 
 # iv
 
 model.addConstr((P >= quicksum(Z[h, t, d, j] * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_) + quicksum(W[h, j] * A[h] * M[h, j] for j in j_ for h in h_)), name='R9')
-# *************************
+# ************************* falta indice i en W
 # v
 
 model.addConstrs((quicksum(W[h, j, i] for j in j_) == 1 for  h in h_), name='R10')
-# ***************
+# *************** falta indice i en W y definir i
 model.addConstrs((M * W[h, j, i] >= quicksum(Z[h, t, d, j] for d in d_ for t in t_) for h in h_ for j in j_), name='R11')
-################## falta definir i
+################## falta definir i e indices de M
 
 model.addConstrs((V[i, j] >= W[h, j, i] for h in h_ for j in j_ for i in i_), name='R12')
 
