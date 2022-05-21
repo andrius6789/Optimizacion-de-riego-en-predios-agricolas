@@ -1,3 +1,4 @@
+import random
 from gurobipy import * #se importa todo de la biblioteca
 from gurobipy import Model, GRB, quicksum # se agrega Model, quicksum
 #m.write("riego en predios agricolas.lp")
@@ -10,6 +11,7 @@ I = 5
 H = 100
 T = 24 #no cambiar este
 J = 3
+Amin, Amax = 1,5
 
 #rangos
 d_ = range(1, D + 1) #dias
@@ -19,8 +21,14 @@ t_ = range(1, T + 1) #horas
 j_ = range(1, J + 1) #metodos de riego
 
 #conjuntos/parametros
-Ne = [{i,h,d} for i in i_ for h in h_ for d in d_] #hay que darle valor 1 o 0
-A = [{h} for h in h_] #como le asociamos valores reales de m^2 a cada area para todo h?, son valores iguales para todo h?
+# Ne = [{i,h,d} for i in i_ for h in h_ for d in d_] #hay que darle valor 1 o 0
+
+Ne = {(i, h, d): random.randint(0, 1) for i in i_ for h in h_ for d in d_} # cada Ne_ihd se instancia como 0 o 1 random
+
+# A = [{h} for h in h_] #como le asociamos valores reales de m^2 a cada area para todo h?, son valores iguales para todo h?
+
+A = {h: random.uniform(Amin, Amax) for h in h_} # cada A_h es un valor random entre 1 y 5 m2
+
 DA = [{d} for d in d_] #misma pregunta re arriba, es un valor constante no? podria quedar DA = input("cuales son sus derechos de agua en metros cubicos")
 ETo = [{d} for d in d_]
 P = input("cual es su presupuesto en pesos?: ") #para todos los dias d
@@ -52,7 +60,7 @@ II =m.addVars(t_,d_) #Este es I pero ya existe un valor I para los rangos
 #Restriccion i) 
 ## Como agregas una igualdad de valores para un punto del conjunto especifico??
 ###dice como comentario que sobra X, habria que eliminar la suma de Xhtd y listo considerando que se soluciona "##"
-#m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
+# m.addConstrs(((II[t-1,d]) + sum(X[h,t,d] for h in h_) + Y[t,d] == quicksum(Z[h,t,d,j] + II[t,d] for j in j_ for h in h_) + II[t,d]) for t in range (2,T+1) for d in d_ )
 
 #Restriccion ii)
 #m.addConstrs(quicksum(Z[h,t,d,j]*E[j,t] for t in t_ for j in j_) + Pp[d] * A[h] >= sum(Zr[h,t,d]) for h in h_ for d in d_)
