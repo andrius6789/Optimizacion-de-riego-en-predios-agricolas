@@ -34,8 +34,8 @@ with open(os.path.join('Data', 'Datos_resumidos.csv'), mode='r') as file:
     reader = csv.reader(file, delimiter=';')
     next(reader, None)
     next(reader, None) # saltarse headers
-    Pp = {int(row[2]):float(row[3]) for row in reader} # Pp de cada dia en mm leido del csv del excel con los datos.
-    ETo = {int(row[5]):float(row[6]) for row in reader} # Eto de cada dia en mm leido del csv del excel con los datos.
+    Pp = {int(row[2]):float(row[3].replace(',', '.')) for row in reader} # Pp de cada dia en mm leido del csv del excel con los datos.
+    ETo = {int(row[5]):float(row[6].replace(',', '.')) for row in reader} # Eto de cada dia en mm leido del csv del excel con los datos.
 
 P = 80000000 # dato arbitrario elegido en informe E2
 
@@ -76,11 +76,12 @@ X = model.addVars(h_, t_, d_, vtype = GRB.CONTINUOUS, name='X_htd')
 
 Y = model.addVars(t_, d_, vtype = GRB.CONTINUOUS, name='Y_td')
 
-Zr = model.addVars(h_, t_, d_, j_, vtype = GRB.CONTINUOUS, name='Zr_htdj')
+Zr = model.addVars(h_, t_, d_, vtype = GRB.CONTINUOUS, name='Zr_htdj')
 
 W = model.addVars(h_, j_, i_, vtype = GRB.BINARY, name='W_hji')
 
 I = model.addVars(t_, d_, vtype = GRB.CONTINUOUS, name='I_td')
+
 
 model.update()
 
@@ -99,13 +100,13 @@ model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d]
 
 # iii
 ########## faltan los indices de M
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * Eto[q] - M * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R5')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * ETo[q] - M * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1)), name='R5')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R6')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * ETo[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R6')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R7')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * ETo[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R7')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * Eto[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R8')
+model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * ETo[q]) / 2) - M * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for i in i_ ), name='R8')
 
 # iv
 
@@ -139,5 +140,21 @@ model.setObjective(quicksum(Z[h, t, d, j] for d in d_ for t in t_ for h in h_ fo
 model.optimize()
 
 vo = model.ObjVal
+
+# print("\n"+"-"*10+" Manejo Soluciones "+"-"*10)
+# print(f'Valor optimo: {vo}')
+# for sitio in Sitios:
+#   if x[sitio].x != 0:
+#     print(f'se construye campanentio en sitio {sitio}')
+#   if s[sitio].x != 0:
+#     print(f'se asignan {s[sitio].x} personas para vacunarse en sitio {sitio}')
+#     for localidad in Localidades:
+#       if y[localidad, sitio].x != 0:
+#         print(f'se asocia localidad {localidad} con campamento en sitio {sitio}')
+# # ¿Cuál de las restricciones son activas?
+# print("\n"+"-"*9+" Restricciones Activas "+"-"*9)
+
+# for constr in model.getConstrs():
+#   print(constr, constr.getAttr('slack'))
 
 
