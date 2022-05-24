@@ -22,9 +22,11 @@ j_ = range(1, J + 1)
 # parámetros (todos como diccionarios)
 
 Ne = {(i, h, d): 0 for i in i_ for h in h_ for d in d_}
-# se plantan ambos cultivos el primer dia y despues de esto nada mas
-Ne.update({(1, 1, 1): 1})
-Ne.update({(2, 2, 1): 1})
+
+for d in d_:
+    Ne.update({(1, 1, d): 1})
+    Ne.update({(2, 2, d): 1})
+    
 
 A = {1: 10000, 2: 10000} # 2 cuadrantes, ambos de 10.000 m2
 
@@ -104,21 +106,13 @@ model.addConstr((I[1, 1] == alpha), name='R3')
 model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d] * A[h] >= quicksum(Zr[h, t, d] for t in t_) for h in h_ for d in d_), name='R4')
 
 # iii
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + 1, q + T1[i] + 1) for t in t_) >= quicksum(Kc1[i] * ETo[q] - Mg * (1 - Ne[i, h, q]) for d in range(q + 1, q + T1[i] + 1)) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1)), name='R5')
+model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[h] - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) for t in t_) >= quicksum((((Kc1[i] + Kc2[i]) * ETo[q]) / 2) - Mg * (1 - Ne[i, h, q]) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1)) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) ), name='R6')
+model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc1[i] + Kc2[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) ), name='R6')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1) for t in t_) >= quicksum(((Kc2[i] * ETo[q]) / 2) - Mg * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) ), name='R7')
+model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R7')
 
-model.addConstrs((quicksum(Zr[h, t, d] for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1) for t in t_) >= quicksum((((Kc2[i] + Kc3[i]) * ETo[q]) / 2) - Mg * (1 - Ne[i, h, q]) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1)), name='R8')
-
-print('for==========')
-for i in i_:
-    
-    for q in range(1, D - Tt[i] + 1):
-        for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1):
-            if d >= 135:
-                print(d)
+model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
     
 # iv
 
@@ -126,9 +120,9 @@ model.addConstr((P >= quicksum(Z[h, t, d, j] * C[h, t] for j in j_ for d in d_ f
 
 # v
 
-model.addConstrs((quicksum(W[h, j, i] for j in j_) == 1 for  h in h_ for i in i_), name='R10')
+model.addConstrs((quicksum(W[h, j, i] for j in j_ for i in i_  ) == 1 for h in h_), name='R10')
 
-model.addConstrs((Mg * W[h, j, i] >= quicksum(Z[h, t, d, j] for d in d_ for t in t_) for h in h_ for j in j_ for i in i_), name='R11')
+model.addConstrs((Mg * W[h, j, i] >= quicksum(Z[h, t, d, j] * Ne[h, i, d] for d in d_ for t in t_) for h in h_ for j in j_ for i in i_), name='R11')
 
 model.addConstrs((V[i, j] >= W[h, j, i] for h in h_ for j in j_ for i in i_), name='R12')
 
@@ -160,11 +154,5 @@ for h in h_:
         for i in i_:
             if W[h, j, i].x != 0:
                 print(f'Cuadrante h={h} con cultivo i={i} se riega a través del método j={j}')
-                
-# ¿Cuál de las restricciones son activas?
-# print("\n"+"-"*9+" Restricciones Activas "+"-"*9)
 
-# for constr in model.getConstrs():
-#   print(constr, constr.getAttr('slack'))
-
-
+print(f'Costo de la solución: ${sum([Z[h, t, d, j].x * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_]) + sum([W[h, j, i].x * A[h] * M[h, j] for j in j_ for h in h_ for i in i_])}')
