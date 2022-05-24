@@ -147,7 +147,7 @@ model.optimize()
 vo = model.ObjVal
 
 print("\n"+"-"*10+" Manejo Soluciones "+"-"*10)
-print(f'Valor optimo: {vo}')
+print(f'Valor optimo: {vo}L')
         
 for h in h_:
     for j in j_:
