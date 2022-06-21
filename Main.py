@@ -1,6 +1,7 @@
 import csv
 import os
 from gurobipy import GRB, Model, quicksum
+from pathlib import Path
 
 I_ = 2
 T = 24
@@ -32,13 +33,10 @@ A = {1: 10000, 2: 10000} # 2 cuadrantes, ambos de 10.000 m2
 
 DA = {d: 864000 for d in d_} # derechos de agua para cada dia d
 
-data_folder = os.path.join("Data")
 
-file_to_open = os.path.join(data_folder, 'Datos_resumidos.csv')
+data_folder = Path("Data/Datos_resumidos.csv")
 
-f = open(file_to_open)
-
-with open(file_to_open, mode='r') as file:
+with open(data_folder, mode='r') as file:
     reader = csv.reader(file, delimiter=';')
     next(reader, None)
     next(reader, None) # saltarse headers
