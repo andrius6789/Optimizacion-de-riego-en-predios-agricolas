@@ -1,7 +1,22 @@
 import csv
 import os
 from gurobipy import GRB, Model, quicksum
-from pathlib import Path
+
+
+# IMPORTANTE ************************************************
+# ***********************************************************
+# ***********************************************************
+# ***********************************************************
+
+# PARA WINDOWS, abrir con esto:
+path = os.path.join("Optimizacion-de-riego-en-predios-agricolas\Data\Datos_resumidos.csv")
+
+# PARA MAC, abrir con esto:
+path = os.path.join('Data', 'Datos_resumidos.csv')
+
+# ***********************************************************
+# ***********************************************************
+# ***********************************************************
 
 I_ = 2
 T = 24
@@ -20,7 +35,7 @@ h_ = range(1, H + 1)
 d_ = range(1, D + 1)
 j_ = range(1, J + 1)
 
-# parámetros (todos como diccionarios)
+# parametros (todos como diccionarios)
 
 Ne = {(i, h, d): 0 for i in i_ for h in h_ for d in d_}
 
@@ -33,10 +48,7 @@ A = {1: 10000, 2: 10000} # 2 cuadrantes, ambos de 10.000 m2
 
 DA = {d: 864000 for d in d_} # derechos de agua para cada dia d
 
-
-data_folder = Path("Data/Datos_resumidos.csv")
-
-with open(data_folder, mode='r') as file:
+with open(path, mode='r') as file:
     reader = csv.reader(file, delimiter=';')
     next(reader, None)
     next(reader, None) # saltarse headers
@@ -123,7 +135,9 @@ model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d]
 
 # model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
 
-# Las 3 restricciones de arriba
+# Las 3 restricciones de arriba deberian ser suficientes para que el modelo funcione,
+# pero por alguna razon que no sabemos, no se crean las restricciones para
+# h=2, por lo que para solucionarlo se añaden manualmente en las siguientes lineas:
 
 model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[1] - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
 
