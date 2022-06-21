@@ -32,7 +32,13 @@ A = {1: 10000, 2: 10000} # 2 cuadrantes, ambos de 10.000 m2
 
 DA = {d: 864000 for d in d_} # derechos de agua para cada dia d
 
-with open(os.path.join('Data', 'Datos_resumidos.csv'), mode='r') as file:
+data_folder = os.path.join("Data")
+
+file_to_open = os.path.join(data_folder, 'Datos_resumidos.csv')
+
+f = open(file_to_open)
+
+with open(file_to_open, mode='r') as file:
     reader = csv.reader(file, delimiter=';')
     next(reader, None)
     next(reader, None) # saltarse headers
@@ -118,6 +124,8 @@ model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d]
 # model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R7')
 
 # model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
+
+# Las 3 restricciones de arriba
 
 model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[1] - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
 
