@@ -203,3 +203,65 @@ for h in h_:
                 print(f'Cuadrante h={h} con cultivo i={i} se riega a traves del metodo j={j}')
 
 print(f'Costo de la solucion: ${sum([Z[h, t, d, j].x * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_]) + sum([W[h, j, i].x * A[h] * M[h, j] for j in j_ for h in h_ for i in i_])}')
+
+#crear excel con nombre vars.xlsx
+#abrirlo
+#escribir para los ciclos 
+#cerrar
+
+for h in h_:
+    for t in t_:
+        for d in d_:
+            for j in j_:
+                if Z[h,t,d,j].x != 0:
+                    file = open('Variables.csv',"a",newline="")
+                    tupla = (f'La cantidad de Litros en hora {t} en el dia {d} para el cuadrante {h} con el metodo {j} es ', Z[h,t,d,j].x)
+                    writer = csv.writer(file)
+                    writer.writerow(tupla)
+                    file.close
+for h in h_:
+    for t in t_:
+        for d in d_:
+            if X[h,t,d].x != 0:
+                file = open('Variables.csv',"a",newline="")
+                tupla = (f'Los Litros extraidos de la fuente en la hora {t} del dia {d} para el cuadrante {h} son ', X[h,t,d].x)
+                writer = csv.writer(file)
+                writer.writerow(tupla)
+                file.close
+for t in t_:
+        for d in d_:
+            if Y[t,d].x != 0:
+                file = open('Variables.csv',"a",newline="")
+                tupla = (f"Los litros extraidos de la fuente en la hora {t} del dia {d} son ", Y[t,d].x)
+                writer = csv.writer(file)
+                writer.writerow(tupla)
+                file.close
+
+for h in h_:
+    for t in t_:
+        for d in d_:
+            if Zr[h,t,d].x != 0:
+                file = open('Variables.csv',"a",newline="")
+                tupla = (f"La cantidad de litros reales en la hora {t} en el dia {d} para el cuadrante {h} es ", Zr[h,t,d].x)
+                writer = csv.writer(file)
+                writer.writerow(tupla)
+                file.close
+
+for h in h_:
+    for j in j_:
+        for i in i_:
+            if W[h,j,i].x != 0:
+                file = open('Variables.csv',"a",newline="")
+                tupla = (f"Var. Binaria 1 si el cuadrante {h} con plantacion {i} se riega con el metodo {j} es ", W[h,j,i].x)
+                writer = csv.writer(file)
+                writer.writerow(tupla)
+                file.close
+
+for t in t_:
+    for d in d_:
+        if I[t,d].x != 0:
+            file = open('Variables.csv',"a",newline="")
+            tupla = (f" Cantidad de agua almacenada en L en el estanque al final de la hora {t} para el dia {d} es ", I[t,d].x)
+            writer = csv.writer(file)
+            writer.writerow(tupla)
+            file.close
