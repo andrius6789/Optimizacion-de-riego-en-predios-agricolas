@@ -53,6 +53,7 @@ C = {(h, t): 0.11 for h in h_ for t in t_} # clp
 M = {(1, 1): 4750, (2, 1): 4750, (1, 2): 3250, (2, 2): 3250, (1, 3): 1750, (2, 3): 1750} # clp
 
 Ce = 100000 # en L
+# Ce = 100000999999999999 # en L
 
 alpha = 50000 # en L
 
@@ -89,13 +90,17 @@ W = model.addVars(h_, j_, i_, vtype = GRB.BINARY, name='W_hji')
 
 I = model.addVars(t_, d_, vtype = GRB.CONTINUOUS, name='I_td')
 
+Xe = model.addVars(h_, t_, d_, vtype = GRB.CONTINUOUS, name='Xe_htd')
+
 
 model.update()
 
 # restricciones
 
 # i
-model.addConstrs(((I[t - 1, d]) + Y[t, d] == quicksum(Z[h, t, d, j] + I[t, d] for j in j_ for h in h_) for t in range(2, T + 1) for d in d_), name='R1')
+# model.addConstrs(((I[t - 1, d]) + Y[t, d] == quicksum(Z[h, t, d, j] + I[t, d] for j in j_ for h in h_) for t in range(2, T + 1) for d in d_), name='R1')
+
+model.addConstrs(((I[t - 1, d]) + Y[t, d]  == quicksum(Z[h, t, d, j] for j in j_ for h in h_) + I[t, d] + quicksum(Xe[h, t, d] for h in h_) for t in range(2, T + 1) for d in d_), name='R1')
 
 model.addConstrs((I[1, d] == I[24, d - 1] for d in range(2, D + 1)), name='R2')
 
@@ -106,21 +111,41 @@ model.addConstr((I[1, 1] == alpha), name='R3')
 model.addConstrs((quicksum(Z[h, t, d, j] * E[j] for t in t_ for j in j_) + Pp[d] * A[h] >= quicksum(Zr[h, t, d] for t in t_) for h in h_ for d in d_), name='R4')
 
 # iii
-model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[h] - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
+# model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[h] - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
 
-model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc1[i] + Kc2[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) ), name='R6')
+# model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc1[i] + Kc2[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) ), name='R6')
 
-model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R7')
+# model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R7')
 
-model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
+# model.addConstrs((quicksum(Zr[h, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[h]) / 2) - Mg * (1 - Ne[i, h, q]) for i in i_ for j in j_ for h in h_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
+
+model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[1] - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R5')
+
+model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= (((Kc1[i] + Kc2[i]) * ETo[q] * A[1]) / 2) - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) ), name='R6')
+
+model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[1]) / 2) - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R7')
+
+model.addConstrs((quicksum(Zr[1, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[1]) / 2) - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R8')
+
+model.addConstrs((quicksum(Zr[2, t, d] for t in t_) >= Kc1[i] * ETo[q] * A[2] - Mg * (1 - Ne[i, 1, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q, q + T1[i] + 1)), name='R51')
+
+model.addConstrs((quicksum(Zr[2, t, d] for t in t_) >= (((Kc1[i] + Kc2[i]) * ETo[q] * A[2]) / 2) - Mg * (1 - Ne[i, 2, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + 1, q + T1[i] + T2[i] + 1) ), name='R61')
+
+model.addConstrs((quicksum(Zr[2, t, d] for t in t_) >= ((Kc2[i] * ETo[q] * A[2]) / 2) - Mg * (1 - Ne[i, 2, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + 1, q + T1[i] + T2[i] + T3[i] + 1)), name='R71')
+
+model.addConstrs((quicksum(Zr[2, t, d] for t in t_) >= (((Kc2[i] + Kc3[i]) * ETo[q] * A[2]) / 2) - Mg * (1 - Ne[i, 2, q]) for i in i_ for j in j_ for q in range(1, D - Tt[i] + 1) for d in range(q + T1[i] + T2[i] + T3[i] + 1, q + Tt[i] + 1)), name='R81')
     
 # iv
 
 model.addConstr((P >= quicksum(Z[h, t, d, j] * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_) + quicksum(W[h, j, i] * A[h] * M[h, j] for j in j_ for h in h_ for i in i_)), name='R9')
 
+# model.addConstr((P >= quicksum(X[h, t, d] * C[h, t] for d in d_ for t in t_ for h in h_) + quicksum(W[h, j, i] * A[h] * M[h, j] for j in j_ for h in h_ for i in i_)), name='R9')
+
+# model.addConstr((P >= quicksum(Zr[h, t, d] * C[h, t] for d in d_ for t in t_ for h in h_) + quicksum(W[h, j, i] * A[h] * M[h, j] for j in j_ for h in h_ for i in i_)), name='R9')
+
 # v
 
-model.addConstrs((quicksum(W[h, j, i] for j in j_ for i in i_  ) == 1 for h in h_), name='R10')
+model.addConstrs((quicksum(W[h, j, i] for j in j_ for i in i_) == 1 for h in h_), name='R10')
 
 model.addConstrs((Mg * W[h, j, i] >= quicksum(Z[h, t, d, j] * Ne[h, i, d] for d in d_ for t in t_) for h in h_ for j in j_ for i in i_), name='R11')
 
@@ -128,13 +153,27 @@ model.addConstrs((V[i, j] >= W[h, j, i] for h in h_ for j in j_ for i in i_), na
 
 # vi
 
-model.addConstrs((quicksum(X[h, t, d] + Y[t, d] for t in t_ for h in h_) <= DA[d] for d in d_), name='R13')
+# model.addConstrs((quicksum(X[h, t, d] for t in t_ for h in h_) + quicksum(Y[t, d] for t in t_) <= DA[d] for d in d_), name='R13')
+
+model.addConstrs((quicksum(X[h, t, d] + Xe[h, t, d] for t in t_ for h in h_) <= DA[d] for d in d_), name='R13')
 
 # vii
 
 model.addConstrs((I[t, d] <= Ce for d in d_ for t in t_), name='R14')
 
+# viii
+
+model.addConstrs((quicksum(Z[h,t,d,j] for j in j_) <= X[h,t,d] + Xe[h,t,d] for h in h_ for t in t_ for d in d_), name='R15')
+
 # Naturaleza de las variables: se hace sola al instanciar las variables
+
+
+# model.addConstrs((Z[h, 1, d, j] == 0 for h in h_ for d in d_ for j in j_), name='R11')
+
+# model.addConstrs((Y[1, d] == 0 for d in d_), name='R111')
+
+# model.addConstrs((X[h, 1, d] == 0 for h in h_ for d in d_), name='R1111')
+
 
 # funcion objetivo
 
@@ -156,3 +195,21 @@ for h in h_:
                 print(f'Cuadrante h={h} con cultivo i={i} se riega a través del método j={j}')
 
 print(f'Costo de la solución: ${sum([Z[h, t, d, j].x * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_]) + sum([W[h, j, i].x * A[h] * M[h, j] for j in j_ for h in h_ for i in i_])}')
+
+# for t in t_:
+#     for d in d_:
+#         if model.getConstrByName(f'R1[{t},{d}]'):
+#             print(model.getConstrByName(f'R1[{t},{d}]').getAttr(GRB.Attr.RHS))
+
+# for t in range(2, T + 1):
+#     for d in d_:
+#         der = sum(Z[h,t,d,j].x for j in j_ for h in h_) + I[t,d].x
+#         izq = I[t - 1, d].x + Y[t,d].x + sum(X[h, t, d].x for h in h_)
+#         print(f'{izq} = {der}')
+            
+# print('==============')
+# for t in range(1, T + 1):
+#     for d in d_:
+#         res = sum(Z[h,t,d,j].x for j in j_ for h in h_)
+#         if res>2:
+#             print(f'{res}')
