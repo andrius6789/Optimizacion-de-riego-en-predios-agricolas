@@ -216,10 +216,173 @@ for h in h_:
 
 print(f'Costo de la solución: ${sum([Z[h, t, d, j].x * C[h, t] for j in j_ for d in d_ for t in t_ for h in h_]) + sum([W[h, j, i].x * A[h] * M[h, j] for j in j_ for h in h_ for i in i_])}')
 
+print('Holguras')
+
 # for t in t_:
 #     for d in d_:
-#         if model.getConstrByName(f'R1[{t},{d}]'):
-#             print(model.getConstrByName(f'R1[{t},{d}]').getAttr(GRB.Attr.RHS))
+#         constr = model.getConstrByName(f'R1[{t},{d}]')
+#         if constr:
+#             slack = constr.getAttr(GRB.Attr.Slack)
+#             if slack == 0:
+#                 print(f'R1[{t},{d}] es activa')
+
+# for d in d_:
+#     constr = model.getConstrByName(f'R2[{d}]')
+#     if constr:
+#         slack = constr.getAttr(GRB.Attr.Slack)
+#         if slack == 0:
+#             print(f'R2[{d}] es activa')
+
+# constr = model.getConstrByName(f'R3')
+# if constr:
+#     slack = constr.getAttr(GRB.Attr.Slack)
+#     if slack == 0:
+#         print(f'R3 es activa')
+
+# for h in h_:
+#     for d in d_:
+#         constr = model.getConstrByName(f'R4[{h},{d}]')
+#         if constr:
+#             slack = constr.getAttr(GRB.Attr.Slack)
+#             if slack == 0:
+#                 print(f'R4[{h},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R5[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R5[{i},{j},{q},{d}] es activa')
+                        
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R6[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R6[{i},{j},{q},{d}] es activa')
+                        
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R7[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R7[{i},{j},{q},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R8[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R8[{i},{j},{q},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R51[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R51[{i},{j},{q},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R61[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R61[{i},{j},{q},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R71[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R71[{i},{j},{q},{d}] es activa')
+
+# for i in i_:
+#     for j in j_:
+#         for q in d_:
+#             for d in d_:
+#                 constr = model.getConstrByName(f'R81[{i},{j},{q},{d}]')
+#                 if constr:
+#                     slack = constr.getAttr(GRB.Attr.Slack)
+#                     if slack == 0:
+#                         print(f'R81[{i},{j},{q},{d}] es activa')
+
+# constr = model.getConstrByName(f'R9')
+# if constr:
+#     slack = constr.getAttr(GRB.Attr.Slack)
+#     if slack == 0:
+#         print(f'R9 es activa')
+
+# for h in h_:
+#     constr = model.getConstrByName(f'R10[{h}]')
+#     if constr:
+#         slack = constr.getAttr(GRB.Attr.Slack)
+#         if slack == 0:
+#             print(f'R10[{h}] es activa')
+            
+# for h in h_:
+#     for j in j_:
+#         for i in i_:
+#             constr = model.getConstrByName(f'R11[{h},{j},{i}]')
+#             if constr:
+#                 slack = constr.getAttr(GRB.Attr.Slack)
+#                 if slack == 0:
+#                     print(f'R11[{h},{j},{i}] es activa')
+
+# for h in h_:
+#     for j in j_:
+#         for i in i_:
+#             constr = model.getConstrByName(f'R12[{h},{j},{i}]')
+#             if constr:
+#                 slack = constr.getAttr(GRB.Attr.Slack)
+#                 if slack == 0:
+#                     print(f'R12[{h},{j},{i}] es activa')
+
+# for d in d_:
+#     constr = model.getConstrByName(f'R13[{d}]')
+#     if constr:
+#         slack = constr.getAttr(GRB.Attr.Slack)
+#         if slack == 0:
+#             print(f'R13[{d}] es activa')
+
+# for d in d_:
+#     for t in t_:
+#         constr = model.getConstrByName(f'R14[{d},{t}]')
+#         if constr:
+#             slack = constr.getAttr(GRB.Attr.Slack)
+#             if slack == 0:
+#                 print(f'R14[{d},{t}] es activa')
+
+# for h in h_:
+#     for t in t_:
+#         for d in d_:
+#             constr = model.getConstrByName(f'R15[{h},{t},{d}]')
+#             if constr:
+#                 slack = constr.getAttr(GRB.Attr.Slack)
+#                 if slack == 0:
+#                     print(f'R15[{h},{t},{d}] es activa')
+
+
 
 # for t in range(2, T + 1):
 #     for d in d_:
